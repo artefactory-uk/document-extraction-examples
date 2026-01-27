@@ -15,7 +15,7 @@ from document_extraction_tools.config import (
 from document_extraction_tools.runners import (
     EvaluationOrchestrator,
 )
-from document_extraction_tools.types import PathIdentifier, TestExample
+from document_extraction_tools.types import EvaluationExample, PathIdentifier
 from mlflow.entities.span import LiveSpan
 
 from document_extraction_examples.simple_lease_extraction.components.converter.pdf_to_image_converter import (
@@ -116,7 +116,7 @@ def run_evaluation_pipeline(config_dir: Path) -> dict[str, int]:
 
     # 3. Load Evaluation Examples
     loader_path = PathIdentifier(path=cfg.test_data_loader.test_data.path)
-    examples: list[TestExample] = orchestrator.test_data_loader.load_test_data(
+    examples: list[EvaluationExample] = orchestrator.test_data_loader.load_test_data(
         loader_path
     )
 
