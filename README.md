@@ -140,6 +140,20 @@ Each file maps to a component’s config model in `config/` and is loaded by
 
 This project uses `uv` and a pinned Python version (see `pyproject.toml`).
 
+First-time setup checklist:
+
+- Ensure Homebrew is installed (macOS):
+  - `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+- Ensure `make` is installed.
+  - macOS: `brew install make`
+- To run the MLflow server, install Docker:
+  - macOS: `brew install docker docker-buildx colima`
+  - Link Docker BuildX plugin:
+    - `mkdir -p ~/.docker/cli-plugins`
+    - `ln -sfn $(brew --prefix)/opt/docker-buildx/bin/docker-buildx ~/.docker/cli-plugins/docker-buildx`
+
+Then install dependencies:
+
 ```bash
 make install
 ```
@@ -149,7 +163,7 @@ Notes:
 - `document-extraction-tools` is installed from Git over SSH, so you’ll need
   GitHub access via SSH.
 - `pdf2image` typically requires Poppler installed on your system.
-- If you don’t want to use `make`, you can run `uv sync --all-extras`.
+  - macOS: `brew install poppler`
 
 ## Configure
 
