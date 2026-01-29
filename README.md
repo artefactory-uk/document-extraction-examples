@@ -143,14 +143,18 @@ This project uses `uv` and a pinned Python version (see `pyproject.toml`).
 First-time setup checklist:
 
 - Ensure Homebrew is installed (macOS):
-  - `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+    ```bash
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    ```
 - Ensure `make` is installed.
   - macOS: `brew install make`
 - To run the MLflow server, install Docker:
   - macOS: `brew install docker docker-buildx colima`
   - Link Docker BuildX plugin:
-    - `mkdir -p ~/.docker/cli-plugins`
-    - `ln -sfn $(brew --prefix)/opt/docker-buildx/bin/docker-buildx ~/.docker/cli-plugins/docker-buildx`
+    ```bash
+    mkdir -p ~/.docker/cli-plugins  
+    ln -sfn $(brew --prefix)/opt/docker-buildx/bin/docker-buildx ~/.docker/cli-plugins/docker-buildx
+    ```
 
 Then install dependencies:
 
