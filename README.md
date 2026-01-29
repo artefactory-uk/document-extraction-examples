@@ -20,7 +20,7 @@ extraction systems.
   - [Run](#run)
     - [Extraction](#extraction)
     - [Evaluation](#evaluation)
-    - [MLflow server (optional)](#mlflow-server-optional)
+    - [MLflow server](#mlflow-server)
   - [How to build on this](#how-to-build-on-this)
   - [Development](#development)
 
