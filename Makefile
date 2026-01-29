@@ -233,18 +233,6 @@ clean: ## 🗑️ Remove virtual environment and __pycache__ directories
 	@echo "🧹 Cleanup complete."
 	@echo "Note: Globally installed tools (like uv or system Python) are NOT removed."
 
-# ==============================================================================
-# Phony Targets Declaration
-# ==============================================================================
-.PHONY: \
-	help \
-	check-curl setup-uv \
-	install lint test run \
-	check-docker-installed check-colima-installed check-colima-running \
-	build-docker run-docker push-docker \
-	clean
-	start-mlflow
-
 # --- Default Goal ---
 # If 'make' is run without arguments, run the 'help' target.
 .DEFAULT_GOAL := help
