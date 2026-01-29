@@ -1,298 +1,253 @@
-# template-ds-repo
+# document-extraction-examples
 
-This repository provides a template and set of recommended tooling for all Python projects using UV. By following this structure and tooling, you ensure consistency, maintainability, and adherence to best practices across projects.
+Practical, end-to-end examples that implement the interfaces and orchestrators from the
+`document-extraction-tools` [repository](https://github.com/artefactory-uk/document-extraction-tools). 
 
-This repository uses [UV](https://astral.sh/uv) for managing virtual environments and dependencies. UV simplifies venv creation, dependency resolution, installation, and versioning.
+This repository is for data scientists/engineers who want to
+see real, working pipelines and use them as a starting point for their own document
+extraction systems.
 
 ## Table of Contents
-- [template-ds-repo](#template-ds-repo)
-  - [Table of Contents](#table-of-contents)
-  - [Project Structure](#project-structure)
-  - [Getting Started](#getting-started)
-    - [1. Prerequisites](#1-prerequisites)
-        - [MacOS](#macos)
-        - [Ubuntu](#ubuntu)
-        - [Understanding the Makefiles](#understanding-the-makefiles)
-      - [UV installation](#uv-installation)
-      - [Docker installation](#docker-installation)
-        - [MacOS](#macos-1)
-        - [Ubuntu](#ubuntu-1)
-    - [2. Configuration (Optional)](#2-configuration-optional)
-      - [Choosing a Python version](#choosing-a-python-version)
-      - [Configuring the Application Entrypoint](#configuring-the-application-entrypoint)
-      - [Other configurations](#other-configurations)
-    - [3. Installing Dependencies](#3-installing-dependencies)
-    - [4. Managing Dependencies](#4-managing-dependencies)
-      - [The Lock File (`uv.lock`)](#the-lock-file-uvlock)
-    - [5. Running Code](#5-running-code)
-    - [6. Building a Docker Container](#6-building-a-docker-container)
-    - [7. Running a Docker Container](#7-running-a-docker-container)
-  - [Continuous Integration (CI)](#continuous-integration-ci)
-    - [Workflow Overview](#workflow-overview)
-    - [The Importance of Tests](#the-importance-of-tests)
 
-## Project Structure
+- [document-extraction-examples](#document-extraction-examples)
+  - [What this repo is](#what-this-repo-is)
+  - [How it uses document-extraction-tools](#how-it-uses-document-extraction-tools)
+  - [Project layout](#project-layout)
+  - [Examples](#examples)
+    - [Simple lease extraction](#simple-lease-extraction)
+  - [Install](#install)
+  - [Configure](#configure)
+  - [Run](#run)
+    - [Extraction](#extraction)
+    - [Evaluation](#evaluation)
+    - [MLflow server (optional)](#mlflow-server-optional)
+  - [How to build on this](#how-to-build-on-this)
+  - [Development](#development)
+
+## What this repo is
+
+- A set of concrete implementations for the interfaces defined in
+  `document-extraction-tools`.
+- A reference for how to wire components with the provided orchestrators.
+- Runnable baseline for extraction + evaluation workflows.
+
+## How it uses document-extraction-tools
+
+The `document-extraction-tools` library is intentionally implementation-light. It
+defines the interfaces and orchestration logic, and you implement the pieces.
+
+This repo provides those pieces:
+
+- **Interfaces implemented here**
+  - `BaseFileLister`
+  - `BaseReader`
+  - `BaseConverter`
+  - `BaseExtractor`
+  - `BaseExtractionExporter`
+  - `BaseTestDataLoader`
+  - `BaseEvaluator`
+  - `BaseEvaluationExporter`
+- **Orchestrators used from the library**
+  - `ExtractionOrchestrator`
+  - `EvaluationOrchestrator`
+- **Config system used from the library**
+  - `load_config` / `load_evaluation_config`
+  - Base config classes (subclassed in this repo)
+
+The orchestrators handle concurrency (thread pool for CPU-bound steps and async
+concurrency for I/O-bound steps); this repo focuses on the actual logic for each
+pipeline stage.
+
+## Project layout
 
 ```bash
 .
-├── .github
-│   └── workflows
-│       └── run-precommit-and-tests.yaml  # Runs pre-commit hooks and tests
-├── .gitignore                    # Files for git to ignore
-├── .pre-commit-config.yaml       # Configures pre-commit
-├── Makefile                      # Main entry point: Detects OS, includes platform Makefile, runs common tasks.
-├── README.md                     # This file!
-├── pull_request_template.md      # Template to use for pull requests
-├── .env.example                  # Example environment variables file
-├── Dockerfile                    # Dockerfile using UV
-├── pyproject.toml                # Project configuration (build system / dependencies)
-├── uv.lock                       # Exact versions of all dependencies (do not edit manually)
-├── src                           # Root of your module - UV will install this automatically
-│   └── your_module               # Module name (replace in project.name in pyproject.toml)
-│       ├── __init__.py
-│       ├── adder.py
-│       ├── main.py
-│       └── py.typed              # Marker file indicating the package supports type hints 
-└── tests
-    └── test_example.py
-````
-
-## Getting Started
-
-Follow these steps to set up the repository for the first time:
-
-### 1\. Prerequisites
-
-Ensure your machine has a suitable package manager (`brew` or `apt`) and `make` installed.
-
-##### MacOS
-
-First ensure Homebrew is installed:
-
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+├── src
+│   └── document_extraction_examples
+│       └── simple_lease_extraction
+│           ├── components               # Implementations of the base interfaces
+│           ├── config                   # Pydantic config classes + YAML
+│           ├── data                     # Example inputs/outputs/eval data
+│           ├── prompts                  # Prompt references (see MLflow prompt usage)
+│           ├── schema                   # Extraction schema (Pydantic)
+│           ├── utils                    # MLflow + LLM-as-a-judge utilities
+│           ├── extraction_main.py       # Extraction entrypoint
+│           └── evaluation_main.py       # Evaluation entrypoint
+├── tests
+├── Makefile
+├── docker-compose.yaml                  # MLflow server
+├── pyproject.toml
+└── README.md
 ```
 
-Then ensure `make` is installed (it often comes with Xcode Command Line Tools, but installing explicitly doesn't hurt):
+## Examples
 
-```bash
-brew install make
+### Simple lease extraction
+
+Location: `src/document_extraction_examples/simple_lease_extraction`
+
+This example extracts structured lease details from PDFs using Gemini with image
+inputs, and evaluates results against a small labeled dataset.
+
+The example is instrumented with MLflow: traces and evaluation metrics are logged
+so you can inspect runs and results in the MLflow UI.
+
+**Schema**
+
+`SimpleLeaseDetails` is a Pydantic model that defines the target output fields:
+
+- landlord/tenant names and addresses
+- property address + postcode
+- lease start/end dates
+- rent and deposit amounts
+
+**Extraction pipeline components**
+
+- **File lister**: `LocalFileLister`  
+  Lists PDFs under `data/input`.
+- **Reader**: `LocalFileReader`  
+  Reads PDF bytes from disk.
+- **Converter**: `PDFToImageConverter`  
+  Uses `pdf2image` to convert each PDF into image pages.
+- **Extractor**: `GeminiImageExtractor`  
+  Calls the Gemini API with the prompt + image pages and parses a structured
+  response against the schema.
+- **Exporter**: `LocalFileExtractionExporter`  
+  Writes JSON results to `data/output`.
+
+**Evaluation pipeline components**
+
+- **Test data loader**: `LocalJSONTestDataLoader`  
+  Loads labeled examples from `data/evaluation/test_data.json`.
+- **Evaluators**: `AccuracyEvaluator`, `F1Evaluator`  
+  Field-level accuracy and F1; can optionally use an LLM-as-a-judge for fuzzy
+  equality.
+- **Exporter**: `LocalFileEvaluationExporter`  
+  Writes per-metric JSON files and logs average metrics to MLflow.
+
+**Config files**
+
+Configuration lives under:
+
+```
+src/document_extraction_examples/simple_lease_extraction/config/yaml
 ```
 
-##### Ubuntu
+Each file maps to a component’s config model in `config/` and is loaded by
+`load_config` / `load_evaluation_config`.
 
-Ensure `apt` is up-to-date:
+## Install
 
-```bash
-sudo apt update
-```
-
-Then install `make` and necessary build tools:
-
-```bash
-sudo apt install make build-essential
-```
-
-##### Understanding the Makefiles
-
-This project uses a Makefile for automation
-
-  * **`Makefile`**: The entry point for all `make` commands (e.g., `make install`). It auto-detects your OS (macOS or Ubuntu/Debian) to install requirements.
-
-#### UV installation
-The `Makefile` provides targets to install a specific version of UV onto your system. You will need to restart your shell to invoke `uv` once installed. `Makefile` commands (such as `make install`) will not require you to restart your shell. 
-
-#### Docker installation
-
-Docker desktop is not allowed due to licensing constraints. We therefore use `colima` on MacOS to run the docker daemon. Please follow these instructions to install on MacOS/Ubuntu.
-
-##### MacOS
-
-1.  Ensure `homebrew` is installed
-2.  Install Docker, Docker BuildX and Colima
-    ```bash
-    brew install docker docker-buildx colima
-    ```
-3.  Link the Docker BuildX plugin to the Docker install
-    ```bash
-    mkdir -p ~/.docker/cli-plugins  
-    ln -sfn $(brew --prefix)/opt/docker-buildx/bin/docker-buildx ~/.docker/cli-plugins/docker-buildx
-    ```
-4.  Start the colima runtime
-    ```bash
-    colima start
-    ```
-5.  Verify installation
-    ```bash
-    docker buildx version
-    ```
-    This should output something similar to
-    ```bash
-    github.com/docker/buildx v0.30.1 Homebrew
-    ```
-
-##### Ubuntu
-
-1.  Update APT
-    ```bash
-    sudo apt update
-    ```
-2.  Install Docker and Docker BuildX
-    ```bash
-    sudo apt install -y docker.io docker-buildx
-    ```
-3.  Start and enable docker
-    ```bash
-    sudo systemctl start docker
-    sudo systemctl enable docker
-    ```
-4.  Grant your user permissions to use docker without `sudo`
-    ```bash
-    sudo usermod -aG docker $USER
-    newgrp docker
-    ```
-    Note: this should work first time but you may need to restart your ubuntu instance to use docker without `sudo`.
-5.  Verify installation
-    ```bash
-    docker buildx version
-    ```
-    This should output something similar to
-    ```bash
-    [github.com/docker/buildx](https://github.com/docker/buildx) 0.21.3 0.21.3-0ubuntu1~24.04.1
-    ```
-
-### 2\. Configuration (Optional)
-
-#### Choosing a Python version
-
-The project requires a strict Python version defined in `pyproject.toml` (currently `3.12.10`).
-
-  * **Automatic Management:** When you run `make install` (or `uv sync`), `uv` will automatically download and install the required Python version if it is not present on your system. You do not need to manually install Python using `brew` or `apt` purely for this project.
-  * **Changing Versions:** To change the project's Python version, edit the `requires-python` line in `pyproject.toml`.
-
-#### Configuring the Application Entrypoint
-
-The `Makefile` is configured to run a specific module as the main application entry point.
-
-  * **Current Entrypoint:** `your_module.main`
-  * **How to Change:** If you rename your source directory or change the main script, update the `APP_ENTRYPOINT` variable in the `Makefile`:
-    ```makefile
-    # Inside Makefile
-    APP_ENTRYPOINT := your_new_module.new_main_script
-    ```
-
-#### Other configurations
-
-1.  Copy `.env.example` to `.env`.
-2.  Edit the environment variables as desired.
-3.  Run your `make` commands normally; they will pick up these values.
-
-You can also override on the command line:
-
-```bash
-make install UV_VERSION=0.7.2
-```
-
-### 3\. Installing Dependencies
-
-This installs the specified Python version (via the platform Makefile/environment), installs UV, creates a virtual environment, and installs all project and development dependencies:
+This project uses `uv` and a pinned Python version (see `pyproject.toml`).
 
 ```bash
 make install
 ```
 
-> *Note:* On Ubuntu this may prompt for your password for `sudo` when installing system packages.
+Notes:
 
-### 4\. Managing Dependencies
+- `document-extraction-tools` is installed from Git over SSH, so you’ll need
+  GitHub access via SSH.
+- `pdf2image` typically requires Poppler installed on your system.
+- If you don’t want to use `make`, you can run `uv sync --all-extras`.
 
-This project uses `uv` to manage dependencies, which replaces standard `pip` workflows. Do not use `pip install` manually.
+## Configure
 
-  * **Adding a package:** To add a new library (e.g., pandas) and update `pyproject.toml` and `uv.lock` automatically:
-    ```bash
-    uv add pandas
-    ```
-  * **Adding a dev dependency:** To add a tool used only for development (e.g., a new linter):
-    ```bash
-    uv add --dev some-linter
-    ```
-  * **Removing a package:**
-    ```bash
-    uv remove pandas
-    ```
-  * **Syncing:** If you pull changes from git that include an updated `uv.lock`, run:
-    ```bash
-    make install
-    ```
-    (This runs `uv sync` under the hood to ensure your virtual environment matches the lock file).
+Create a `.env` file (or export variables) for API keys and MLflow:
 
-#### The Lock File (`uv.lock`)
+```bash
+cp .env.example .env
+```
 
-The `uv.lock` file contains the exact versions of every dependency (and transitive dependency) installed in the project.
+Required:
 
-  * **Do not edit this file manually.**
-  * **Always commit this file** to version control. This ensures that every developer and the CI/CD pipeline uses the exact same package versions, preventing "it works on my machine" issues.
+- `GEMINI_API_KEY` for the extractor and optional LLM-as-a-judge.
 
-### 5\. Running Code
+For MLflow server via Docker Compose:
 
-To run your main application (configured in the `run` target, e.g. `src/your_module/main.py`):
+- `PG_USER`
+- `PG_PASSWORD`
+
+The default example configuration is under:
+
+`src/document_extraction_examples/simple_lease_extraction/config/yaml`
+
+Key settings to pay attention to:
+
+- `extractor.yaml`  
+  `mlflow_prompt_name` + `mlflow_prompt_version` must exist in your MLflow
+  prompt registry.
+- `file_lister.yaml`  
+  Input directory and file extensions.
+- `test_data_loader.yaml`  
+  Evaluation dataset location.
+- `extraction_exporter.yaml` / `evaluation_exporter.yaml`  
+  Output directories for results.
+- `evaluator.yaml`  
+  Enables LLM-as-a-judge comparisons if desired.
+
+## Run
+
+### Extraction
 
 ```bash
 make run
 ```
 
-This executes `uv run python -m your_module.main`. The `uv run` command ensures the script runs inside the project's isolated virtual environment without requiring you to manually activate it.
+Outputs are written to:
 
-### 6\. Building a Docker Container
+`src/document_extraction_examples/simple_lease_extraction/data/output`
 
-Build a Docker image using the `Dockerfile` (which uses UV to install dependencies):
-
-```bash
-make build-docker
-```
-
-The image will be tagged according to `IMAGE_NAME` and `IMAGE_TAG` (override via `.env` or CLI if desired).
-
-**Note on Caching:** The `Dockerfile` is optimized for caching using `uv`. It uses a multi-stage build where dependencies are installed in a separate `builder` stage using `uv` cache mounts. This significantly speeds up repeated builds.
-
-### 7\. Running a Docker Container
-
-Run the built image interactively, injecting your environment variables from `.env`:
+### Evaluation
 
 ```bash
-make run-docker
+make evaluate
 ```
 
------
+Outputs are written to:
 
-## Continuous Integration (CI)
+`src/document_extraction_examples/simple_lease_extraction/data/evaluation`
 
-This repository includes a CI setup using GitHub Actions to automatically check code quality and run tests on every push and pull request.
+### MLflow server
 
-### Workflow Overview
+This example is instrumented with MLflow tracing. You can run a local MLflow
+server via Docker Compose:
 
-The CI workflow is defined in:
-
+```bash
+make start-mlflow
 ```
-.github/workflows/run-precommit-and-tests.yaml
+
+The extraction/evaluation entrypoints default to:
+
+- Tracking URI: `http://localhost:8080`
+- Experiments: `simple_lease_extraction` / `simple_lease_evaluation`
+
+## How to build on this
+
+If you want to create your own pipeline:
+
+1. **Define a schema**  
+   Add a Pydantic model under `schemas/`.
+2. **Implement components**  
+   Subclass the base interfaces from `document-extraction-tools`.
+3. **Add config models + YAML**  
+   Create config classes in `config/` and YAML in `config/yaml/`.
+4. **Wire an entrypoint**  
+   Follow the pattern in `extraction_main.py` / `evaluation_main.py`.
+5. **Update the Makefile (optional)**  
+   Point `APP_ENTRYPOINT` / `EVAL_ENTRYPOINT` to your new module.
+
+You can also extend the example:
+
+- Swap the extractor to another model/provider.
+- Add post-processing or validation inside the extractor or exporter.
+- Add more evaluators or a different evaluation dataset.
+
+## Development
+
+```bash
+make lint
+make test
 ```
 
-On each push or PR, it:
-
-1.  **Checkout Code**
-    Retrieves your branch or PR.
-2.  **Setup Environment**
-    Installs `make` and necessary build tools, then runs `make install`.
-3.  **Run Linting**
-    Executes `make lint` (via UV run pre-commit) to enforce formatting and static analysis (`black`, `isort`, `ruff`, `mypy`, etc.).
-4.  **Run Tests**
-    Executes `make test` (via UV run pytest) to discover and run your test suite.
-
-### The Importance of Tests
-
-The `make test` step is only valuable if you write meaningful tests:
-
-  * **Create tests** in `tests/` (or alongside your modules) using `pytest`.
-  * If no tests or trivial tests exist, `pytest` may pass with zero tests, giving false confidence.
-  * **Aim for high coverage** on your core logic to catch regressions early.
-
-Both `make lint` and `make test` must pass for a “green” CI status. Failing either will block merges until issues are resolved.
+These run `pre-commit` and `pytest` using the locked `uv` environment.

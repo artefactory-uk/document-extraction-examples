@@ -45,7 +45,7 @@ from document_extraction_examples.simple_lease_extraction.config.local_file_read
 from document_extraction_examples.simple_lease_extraction.config.pdf_to_image_converter_config import (
     PDFToImageConverterConfig,
 )
-from document_extraction_examples.simple_lease_extraction.schema.schema import (
+from document_extraction_examples.simple_lease_extraction.schemas.schema import (
     SimpleLeaseDetails,
 )
 from document_extraction_examples.simple_lease_extraction.utils.mlflow_utils import (

@@ -7,7 +7,7 @@ from document_extraction_tools.types import EvaluationResult
 from document_extraction_examples.simple_lease_extraction.config.evaluator_config import (
     AccuracyEvaluatorConfig,
 )
-from document_extraction_examples.simple_lease_extraction.schema.schema import (
+from document_extraction_examples.simple_lease_extraction.schemas.schema import (
     SimpleLeaseDetails,
 )
 from document_extraction_examples.simple_lease_extraction.utils.llm_as_a_judge import (

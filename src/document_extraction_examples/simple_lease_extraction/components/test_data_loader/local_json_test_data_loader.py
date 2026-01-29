@@ -12,7 +12,7 @@ from document_extraction_tools.types import EvaluationExample, PathIdentifier
 from document_extraction_examples.simple_lease_extraction.config.local_json_test_data_loader_config import (
     LocalJSONTestDataLoaderConfig,
 )
-from document_extraction_examples.simple_lease_extraction.schema.schema import (
+from document_extraction_examples.simple_lease_extraction.schemas.schema import (
     SimpleLeaseDetails,
 )
 
