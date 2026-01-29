@@ -69,7 +69,7 @@ pipeline stage.
 │           ├── config                   # Pydantic config classes + YAML
 │           ├── data                     # Example inputs/outputs/eval data
 │           ├── prompts                  # Prompt references (see MLflow prompt usage)
-│           ├── schema                   # Extraction schema (Pydantic)
+│           ├── schemas                  # Extraction schema (Pydantic)
 │           ├── utils                    # MLflow + LLM-as-a-judge utilities
 │           ├── extraction_main.py       # Extraction entrypoint
 │           └── evaluation_main.py       # Evaluation entrypoint
