@@ -1,9 +1,10 @@
 [project]
-name = "your_module"
+name = "document-extraction-examples"
 version = "0.1.1"
-description = "A template repository following best practises for data science projects."
+description = "Document extraction examples using the document-extraction-tools module."
 authors = [
-  { name = "Your Name", email = "your.name@artefact.com" }
+  { name = "Ollie Kemp", email = "oliver.kemp@artefact.com" },
+  { name = "Nikolas Moatsos", email = "nikolas.moatsos@artefact.com" }
 ]
 # Strictly specify the exact Python version required, in the format
 # requires-python = "==<major>.<minor>.<patch>"
@@ -13,7 +14,18 @@ dependencies = [
   # Add project dependencies here
   # For example:
   # "numpy>=1.20,<2.3"
+  "pydantic>=2.0.0",
+  "pdf2image>=1.17.0",
+  "google-genai>=1.52.0",
+  "aiofiles>=25.1.0",
+  "python-dotenv>=1.2.1",
+  "mlflow>=3.8.1",
+  "tenacity>=9.1.2",
+  "document-extraction-tools"
 ]
+
+[tool.uv.sources]
+document-extraction-tools = { git = "ssh://git@github.com/artefactory-uk/document-extraction-tools.git" }
 
 [project.optional-dependencies]
 dev = [
@@ -83,7 +95,7 @@ quote-style = "double"
 "__init__.py" = ["D104"] # ignore no docstrings in __init__.py
 
 [tool.ruff.lint.isort]
-known-first-party = ["your_module"] # enter your module name here, e.g. "src"
+known-first-party = ["document-extraction-examples"] # enter your module name here, e.g. "src"
 
 [build-system]
 requires = ["uv_build>=0.9.9,<0.10.0"]

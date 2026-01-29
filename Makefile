@@ -12,7 +12,8 @@
 # --- Entry point for the application ---
 # Note: we run as a module (e.g., 'python -m your_module.main') to ensure correct import resolution and package discovery.
 # This approach sets up the package context properly, allowing relative imports and dependencies to work as intended.
-APP_ENTRYPOINT := your_module.main
+APP_ENTRYPOINT := document_extraction_examples.simple_lease_extraction.extraction_main
+EVAL_ENTRYPOINT := document_extraction_examples.simple_lease_extraction.evaluation_main
 
 # --- Shell Configuration ---
 SHELL       := /bin/bash
@@ -134,6 +135,12 @@ run: install ## ▶️ Run the main application (main.py)
 	$(UV_CMD) run python -m $(APP_ENTRYPOINT)
 	@echo "✅ Application finished."
 
+.PHONY: evaluate
+evaluate: install ## ▶️ Run the evaluation example (eval_main.py)
+	@echo "--- Running evaluation (eval_main.py) ---"
+	$(UV_CMD) run python -m $(EVAL_ENTRYPOINT)
+	@echo "✅ Evaluation finished."
+
 # ==============================================================================
 # Docker Targets
 # ==============================================================================
@@ -208,6 +215,12 @@ push-docker: ## ⬆️ Push the Docker image to a registry (requires login)
 	$(DOCKER_CMD) push $(IMAGE_NAME):$(IMAGE_TAG)
 	@echo "✅ Docker image $(IMAGE_NAME):$(IMAGE_TAG) pushed."
 
+
+.PHONY: start-mlflow
+start-mlflow: check-colima-running  ## 🚀 Start MLflow server in Docker container using docker-compose
+	@echo "--- Starting MLflow server in Docker container ---"
+	$(DOCKER_CMD) compose up
+
 # ==============================================================================
 # Cleanup Target
 # ==============================================================================
@@ -219,17 +232,6 @@ clean: ## 🗑️ Remove virtual environment and __pycache__ directories
 	@find . -type d -name "__pycache__" -exec rm -rf {} +
 	@echo "🧹 Cleanup complete."
 	@echo "Note: Globally installed tools (like uv or system Python) are NOT removed."
-
-# ==============================================================================
-# Phony Targets Declaration
-# ==============================================================================
-.PHONY: \
-	help \
-	check-curl setup-uv \
-	install lint test run \
-	check-docker-installed check-colima-installed check-colima-running \
-	build-docker run-docker push-docker \
-	clean
 
 # --- Default Goal ---
 # If 'make' is run without arguments, run the 'help' target.
