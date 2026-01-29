@@ -17,6 +17,7 @@ extraction systems.
     - [Simple lease extraction](#simple-lease-extraction)
   - [Install](#install)
   - [Configure](#configure)
+    - [MLflow prompts](#mlflow-prompts)
   - [Run](#run)
     - [Extraction](#extraction)
     - [Evaluation](#evaluation)
@@ -75,8 +76,11 @@ pipeline stage.
 │           └── evaluation_main.py       # Evaluation entrypoint
 ├── tests
 ├── Makefile
+├── Dockerfile
 ├── docker-compose.yaml                  # MLflow server
+├── pull_request_template.md
 ├── pyproject.toml
+├── uv.lock
 └── README.md
 ```
 
@@ -203,6 +207,23 @@ Key settings to pay attention to:
   Output directories for results.
 - `evaluator.yaml`  
   Enables LLM-as-a-judge comparisons if desired.
+
+### MLflow prompts
+
+The extractor retrieves a prompt stored in the MLflow prompt registry. Configure the
+prompt name and version in `config/yaml/extractor.yaml`.
+
+Example:
+
+```yaml
+mlflow_prompt_name: "lease_extraction_prompt"
+mlflow_prompt_version: 1
+```
+
+Create the prompt in MLflow before running the pipeline. The prompt text lives in
+`src/document_extraction_examples/simple_lease_extraction/prompts/system_prompt.md`
+as a starting point. If you change the prompt in MLflow, bump the version and
+update `mlflow_prompt_version` accordingly.
 
 ## Run
 
