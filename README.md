@@ -78,6 +78,7 @@ pipeline stage.
 ├── Makefile
 ├── Dockerfile
 ├── docker-compose.yaml                  # MLflow server
+├── docs                                 # Documentation assets (e.g., MLflow UI screenshot)
 ├── pull_request_template.md
 ├── pyproject.toml
 ├── uv.lock
