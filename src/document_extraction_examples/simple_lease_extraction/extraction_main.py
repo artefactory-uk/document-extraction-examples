@@ -66,7 +66,7 @@ def run_extraction_pipeline(config_dir: Path) -> dict[str, int]:
         span.set_inputs({"config_dir": str(config_dir)})
 
     # 1. Load Configuration
-    cfg: ExtractionPipelineConfig = load_config(
+    config: ExtractionPipelineConfig = load_config(
         config_dir=config_dir,
         orchestrator_config_cls=ExtractionOrchestratorConfig,
         lister_config_cls=LocalFileListerConfig,
@@ -81,7 +81,7 @@ def run_extraction_pipeline(config_dir: Path) -> dict[str, int]:
     # 2. Initialize Orchestrator
     orchestrator: ExtractionOrchestrator[SimpleLeaseDetails] = (
         ExtractionOrchestrator.from_config(
-            config=cfg,
+            config=config,
             schema=SimpleLeaseDetails,
             reader_cls=LocalFileReader,
             converter_cls=PDFToImageConverter,
@@ -91,7 +91,7 @@ def run_extraction_pipeline(config_dir: Path) -> dict[str, int]:
     )
 
     # 3. List Files to Process
-    lister = LocalFileLister(cfg.file_lister)
+    lister = LocalFileLister(config.file_lister)
     files: list[PathIdentifier] = lister.list_files()
 
     logger.info("Found %d files to process.", len(files))

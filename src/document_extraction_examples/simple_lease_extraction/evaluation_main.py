@@ -83,7 +83,7 @@ def run_evaluation_pipeline(config_dir: Path) -> dict[str, int]:
         AccuracyEvaluatorConfig,
         F1EvaluatorConfig,
     ]
-    cfg: EvaluationPipelineConfig = load_evaluation_config(
+    config: EvaluationPipelineConfig = load_evaluation_config(
         config_dir=config_dir,
         orchestrator_config_cls=EvaluationOrchestratorConfig,
         test_data_loader_config_cls=LocalJSONTestDataLoaderConfig,
@@ -103,7 +103,7 @@ def run_evaluation_pipeline(config_dir: Path) -> dict[str, int]:
     ]
     orchestrator: EvaluationOrchestrator[SimpleLeaseDetails] = (
         EvaluationOrchestrator.from_config(
-            config=cfg,
+            config=config,
             schema=SimpleLeaseDetails,
             reader_cls=LocalFileReader,
             converter_cls=PDFToImageConverter,
@@ -115,7 +115,7 @@ def run_evaluation_pipeline(config_dir: Path) -> dict[str, int]:
     )
 
     # 3. Load Evaluation Examples
-    loader_path = PathIdentifier(path=cfg.test_data_loader.test_data.path)
+    loader_path = PathIdentifier(path=config.test_data_loader.test_data.path)
     examples: list[EvaluationExample] = orchestrator.test_data_loader.load_test_data(
         loader_path
     )

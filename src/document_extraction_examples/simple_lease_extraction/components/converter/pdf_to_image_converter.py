@@ -5,7 +5,7 @@ from pathlib import Path
 
 from document_extraction_tools.base import BaseConverter
 from document_extraction_tools.types import Document, DocumentBytes, ImageData, Page
-from pdf2image import convert_from_bytes  # type: ignore
+from pdf2image import convert_from_bytes
 
 from document_extraction_examples.simple_lease_extraction.config.pdf_to_image_converter_config import (
     PDFToImageConverterConfig,
