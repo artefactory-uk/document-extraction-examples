@@ -225,6 +225,14 @@ Create the prompt in MLflow before running the pipeline. The prompt text lives i
 as a starting point. If you change the prompt in MLflow, bump the version and
 update `mlflow_prompt_version` accordingly.
 
+How to add your prompt in MLflow:
+
+![MLflow prompts UI](docs/assets/images/mlflow-prompts-1.png)
+
+![MLflow prompts UI](docs/assets/images/mlflow-prompts-2.png)
+
+*(More information about MLflow setup [here](#mlflow-server).)*
+
 ## Run
 
 ### Extraction
