@@ -21,11 +21,8 @@ dependencies = [
   "python-dotenv>=1.2.1",
   "mlflow>=3.8.1",
   "tenacity>=9.1.2",
-  "document-extraction-tools"
+  "document-extraction-tools>=0.1.0",
 ]
-
-[tool.uv.sources]
-document-extraction-tools = { git = "ssh://git@github.com/artefactory-uk/document-extraction-tools.git" }
 
 [project.optional-dependencies]
 dev = [
