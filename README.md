@@ -1,7 +1,7 @@
 # document-extraction-examples
 
 Practical, end-to-end examples that implement the interfaces and orchestrators from the
-`document-extraction-tools` [repository](https://github.com/artefactory-uk/document-extraction-tools). 
+`document-extraction-tools` [package](https://pypi.org/project/document-extraction-tools/). 
 
 This repository is for data scientists/engineers who want to
 see real, working pipelines and use them as a starting point for their own document
@@ -168,9 +168,6 @@ make install
 ```
 
 Notes:
-
-- `document-extraction-tools` is installed from Git over SSH, so you’ll need
-  GitHub access via SSH.
 - `pdf2image` typically requires Poppler installed on your system.
   - macOS: `brew install poppler`
 
