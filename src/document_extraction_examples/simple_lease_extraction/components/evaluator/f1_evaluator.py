@@ -2,7 +2,11 @@
 
 import mlflow
 from document_extraction_tools.base import BaseEvaluator
-from document_extraction_tools.types import EvaluationResult
+from document_extraction_tools.types import (
+    EvaluationResult,
+    ExtractionResult,
+    PipelineContext,
+)
 
 from document_extraction_examples.simple_lease_extraction.config.evaluator_config import (
     F1EvaluatorConfig,
@@ -44,11 +48,15 @@ class F1Evaluator(BaseEvaluator[SimpleLeaseDetails]):
 
     @mlflow.trace(name="evaluate_f1", span_type="EVALUATOR")
     def evaluate(
-        self, true: SimpleLeaseDetails, pred: SimpleLeaseDetails
+        self,
+        true: ExtractionResult[SimpleLeaseDetails],
+        pred: ExtractionResult[SimpleLeaseDetails],
+        context: PipelineContext | None = None,
     ) -> EvaluationResult:
         """Compute field-level F1 score."""
-        true_data = true.model_dump()
-        pred_data = pred.model_dump()
+        _ = context
+        true_data = true.data.model_dump()
+        pred_data = pred.data.model_dump()
 
         tp = fp = fn = 0
         for key, true_value in true_data.items():

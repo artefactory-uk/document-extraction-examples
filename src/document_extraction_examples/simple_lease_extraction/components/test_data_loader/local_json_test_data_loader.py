@@ -7,7 +7,13 @@ import mlflow
 from document_extraction_tools.base import (
     BaseTestDataLoader,
 )
-from document_extraction_tools.types import EvaluationExample, PathIdentifier
+from document_extraction_tools.config import EvaluationPipelineConfig
+from document_extraction_tools.types import (
+    EvaluationExample,
+    ExtractionResult,
+    PathIdentifier,
+    PipelineContext,
+)
 
 from document_extraction_examples.simple_lease_extraction.config.local_json_test_data_loader_config import (
     LocalJSONTestDataLoaderConfig,
@@ -20,16 +26,21 @@ from document_extraction_examples.simple_lease_extraction.schemas.schema import 
 class LocalJSONTestDataLoader(BaseTestDataLoader[SimpleLeaseDetails]):
     """Loads evaluation examples from a JSON file."""
 
-    def __init__(self, config: LocalJSONTestDataLoaderConfig) -> None:
+    def __init__(
+        self,
+        config: LocalJSONTestDataLoaderConfig | EvaluationPipelineConfig,
+    ) -> None:
         """Initialize with a local test data loader configuration."""
         super().__init__(config)
-        self.config = config
 
     @mlflow.trace(name="load_test_data", span_type="RETRIEVER")
     def load_test_data(
-        self, path_identifier: PathIdentifier
+        self,
+        path_identifier: PathIdentifier,
+        context: PipelineContext | None = None,
     ) -> list[EvaluationExample[SimpleLeaseDetails]]:
         """Load test examples from a JSON file."""
+        _ = context
         input_path = Path(path_identifier.path)
         if not input_path.exists():
             raise FileNotFoundError(f"Test data not found: {input_path}")
@@ -59,7 +70,9 @@ class LocalJSONTestDataLoader(BaseTestDataLoader[SimpleLeaseDetails]):
                 EvaluationExample(
                     id=example_id,
                     path_identifier=PathIdentifier(path=resolved_path),
-                    true=SimpleLeaseDetails.model_validate(expectations),
+                    true=ExtractionResult(
+                        data=SimpleLeaseDetails.model_validate(expectations)
+                    ),
                 )
             )
 

@@ -9,7 +9,12 @@ import mlflow
 from document_extraction_tools.base import (
     BaseEvaluationExporter,
 )
-from document_extraction_tools.types import Document, EvaluationResult
+from document_extraction_tools.config import EvaluationPipelineConfig
+from document_extraction_tools.types import (
+    Document,
+    EvaluationResult,
+    PipelineContext,
+)
 
 from document_extraction_examples.simple_lease_extraction.config.local_file_evaluation_exporter_config import (
     LocalFileEvaluationExporterConfig,
@@ -19,16 +24,22 @@ from document_extraction_examples.simple_lease_extraction.config.local_file_eval
 class LocalFileEvaluationExporter(BaseEvaluationExporter):
     """Writes evaluation results to local JSON files and logs metrics to MLflow."""
 
-    def __init__(self, config: LocalFileEvaluationExporterConfig) -> None:
+    def __init__(
+        self,
+        config: LocalFileEvaluationExporterConfig | EvaluationPipelineConfig,
+    ) -> None:
         """Initialize the local file evaluation exporter."""
         super().__init__(config)
         Path(self.config.destination.path).mkdir(parents=True, exist_ok=True)
 
     @mlflow.trace(name="export_evaluation_results", span_type="MEMORY")
     async def export(
-        self, results: list[tuple[Document, list[EvaluationResult]]]
+        self,
+        results: list[tuple[Document, list[EvaluationResult]]],
+        context: PipelineContext | None = None,
     ) -> None:
         """Export results to JSON files and log averages to MLflow."""
+        _ = context
         span = mlflow.get_current_active_span()
         if span:
             span.set_inputs(

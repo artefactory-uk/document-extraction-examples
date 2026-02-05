@@ -8,7 +8,7 @@ import mlflow
 from document_extraction_tools.config import (
     ExtractionOrchestratorConfig,
     ExtractionPipelineConfig,
-    load_config,
+    load_extraction_config,
 )
 from document_extraction_tools.runners import (
     ExtractionOrchestrator,
@@ -66,14 +66,14 @@ def run_extraction_pipeline(config_dir: Path) -> dict[str, int]:
         span.set_inputs({"config_dir": str(config_dir)})
 
     # 1. Load Configuration
-    config: ExtractionPipelineConfig = load_config(
+    config: ExtractionPipelineConfig = load_extraction_config(
         config_dir=config_dir,
-        orchestrator_config_cls=ExtractionOrchestratorConfig,
+        extraction_orchestrator_config_cls=ExtractionOrchestratorConfig,
         lister_config_cls=LocalFileListerConfig,
         reader_config_cls=LocalFileReaderConfig,
         converter_config_cls=PDFToImageConverterConfig,
         extractor_config_cls=GeminiImageExtractorConfig,
-        exporter_config_cls=LocalFileExtractionExporterConfig,
+        extraction_exporter_config_cls=LocalFileExtractionExporterConfig,
     )
 
     logger.info("Configuration loaded successfully.")
@@ -83,16 +83,16 @@ def run_extraction_pipeline(config_dir: Path) -> dict[str, int]:
         ExtractionOrchestrator.from_config(
             config=config,
             schema=SimpleLeaseDetails,
+            file_lister_cls=LocalFileLister,
             reader_cls=LocalFileReader,
             converter_cls=PDFToImageConverter,
             extractor_cls=GeminiImageExtractor,
-            exporter_cls=LocalFileExtractionExporter,
+            extraction_exporter_cls=LocalFileExtractionExporter,
         )
     )
 
     # 3. List Files to Process
-    lister = LocalFileLister(config.file_lister)
-    files: list[PathIdentifier] = lister.list_files()
+    files: list[PathIdentifier] = orchestrator.file_lister.list_files()
 
     logger.info("Found %d files to process.", len(files))
 

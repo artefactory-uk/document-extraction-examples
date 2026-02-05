@@ -52,7 +52,7 @@ This repo provides those pieces:
   - `ExtractionOrchestrator`
   - `EvaluationOrchestrator`
 - **Config system used from the library**
-  - `load_config` / `load_evaluation_config`
+- `load_extraction_config` / `load_evaluation_config`
   - Base config classes (subclassed in this repo)
 
 The orchestrators handle concurrency (thread pool for CPU-bound steps and async
@@ -139,7 +139,7 @@ src/document_extraction_examples/simple_lease_extraction/config/yaml
 ```
 
 Each file maps to a component’s config model in `config/` and is loaded by
-`load_config` / `load_evaluation_config`.
+`load_extraction_config` / `load_evaluation_config`.
 
 ## Install
 
