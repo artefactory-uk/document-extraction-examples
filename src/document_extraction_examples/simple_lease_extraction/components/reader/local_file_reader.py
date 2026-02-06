@@ -34,7 +34,7 @@ class LocalFileReader(BaseReader):
         self, path: PathIdentifier, context: PipelineContext | None = None
     ) -> DocumentBytes:
         """Read bytes from the given path identifier."""
-        _ = context
+        _ = context  # Required by BaseReader; reserved for future metadata.
         file_path = Path(path.path)
 
         return DocumentBytes(

@@ -54,7 +54,7 @@ class F1Evaluator(BaseEvaluator[SimpleLeaseDetails]):
         context: PipelineContext | None = None,
     ) -> EvaluationResult:
         """Compute field-level F1 score."""
-        _ = context
+        _ = context  # Required by BaseEvaluator; reserved for future metadata.
         true_data = true.data.model_dump()
         pred_data = pred.data.model_dump()
 

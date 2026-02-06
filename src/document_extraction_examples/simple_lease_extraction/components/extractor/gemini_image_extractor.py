@@ -70,7 +70,7 @@ class GeminiImageExtractor(BaseExtractor):
         context: PipelineContext | None = None,
     ) -> ExtractionResult[ExtractionSchema]:
         """Run extraction against the Gemini API."""
-        _ = context
+        _ = context  # Required by BaseExtractor; reserved for future metadata.
         span = mlflow.get_current_active_span()
         if span:
             span.set_inputs(

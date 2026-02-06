@@ -35,7 +35,7 @@ class LocalFileExtractionExporter(BaseExtractionExporter):
         context: PipelineContext | None = None,
     ) -> None:
         """Persist the extracted data as JSON."""
-        _ = context
+        _ = context  # Required by BaseExtractionExporter; reserved for future metadata.
         span = mlflow.get_current_active_span()
         if span:
             span.set_inputs(

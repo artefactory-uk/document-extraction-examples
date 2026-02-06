@@ -28,7 +28,7 @@ class LocalFileLister(BaseFileLister):
         self, context: PipelineContext | None = None
     ) -> list[PathIdentifier]:
         """Return PathIdentifier entries for matching files."""
-        _ = context
+        _ = context  # Required by BaseFileLister; reserved for future metadata.
         span = mlflow.get_current_active_span()
         if span:
             span.set_inputs({"source_dir": str(self.source_dir)})

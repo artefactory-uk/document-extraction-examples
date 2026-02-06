@@ -40,7 +40,7 @@ class LocalJSONTestDataLoader(BaseTestDataLoader[SimpleLeaseDetails]):
         context: PipelineContext | None = None,
     ) -> list[EvaluationExample[SimpleLeaseDetails]]:
         """Load test examples from a JSON file."""
-        _ = context
+        _ = context  # Required by BaseTestDataLoader; reserved for future metadata.
         input_path = Path(path_identifier.path)
         if not input_path.exists():
             raise FileNotFoundError(f"Test data not found: {input_path}")

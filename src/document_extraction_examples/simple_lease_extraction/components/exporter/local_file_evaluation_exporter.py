@@ -39,7 +39,7 @@ class LocalFileEvaluationExporter(BaseEvaluationExporter):
         context: PipelineContext | None = None,
     ) -> None:
         """Export results to JSON files and log averages to MLflow."""
-        _ = context
+        _ = context  # Required by BaseEvaluationExporter; reserved for future metadata.
         span = mlflow.get_current_active_span()
         if span:
             span.set_inputs(

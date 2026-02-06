@@ -44,7 +44,7 @@ class PDFToImageConverter(BaseConverter):
         context: PipelineContext | None = None,
     ) -> Document:
         """Convert raw PDF bytes into a Document with image pages."""
-        _ = context
+        _ = context  # Required by BaseConverter; reserved for future metadata.
         pil_images = convert_from_bytes(
             document_bytes.file_bytes, dpi=self.dpi, fmt=self.image_format
         )
