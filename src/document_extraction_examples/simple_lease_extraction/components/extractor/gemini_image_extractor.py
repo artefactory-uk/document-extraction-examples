@@ -4,7 +4,17 @@ import os
 
 import mlflow
 from document_extraction_tools.base import BaseExtractor
-from document_extraction_tools.types import Document, ExtractionSchema, ImageData
+from document_extraction_tools.config import (
+    EvaluationPipelineConfig,
+    ExtractionPipelineConfig,
+)
+from document_extraction_tools.types import (
+    Document,
+    ExtractionResult,
+    ExtractionSchema,
+    ImageData,
+    PipelineContext,
+)
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
@@ -24,7 +34,14 @@ from document_extraction_examples.simple_lease_extraction.config.gemini_image_ex
 class GeminiImageExtractor(BaseExtractor):
     """Extracts lease data from images using the Gemini API."""
 
-    def __init__(self, config: GeminiImageExtractorConfig) -> None:
+    def __init__(
+        self,
+        config: (
+            GeminiImageExtractorConfig
+            | ExtractionPipelineConfig
+            | EvaluationPipelineConfig
+        ),
+    ) -> None:
         """Initialize the extractor and client."""
         super().__init__(config)
 
@@ -34,7 +51,7 @@ class GeminiImageExtractor(BaseExtractor):
             raise ValueError("Set GEMINI_API_KEY in the environment.")
 
         self.client = genai.Client(api_key=api_key)
-        self.model_name = config.model_name
+        self.model_name = self.config.model_name
 
         self.prompt = mlflow.genai.load_prompt(
             f"prompts:/{self.config.mlflow_prompt_name}/{self.config.mlflow_prompt_version}"
@@ -47,9 +64,13 @@ class GeminiImageExtractor(BaseExtractor):
     )
     @mlflow.trace(name="extract_from_images", span_type="LLM")
     async def extract(
-        self, document: Document, schema: type[ExtractionSchema]
-    ) -> ExtractionSchema:
+        self,
+        document: Document,
+        schema: type[ExtractionSchema],
+        context: PipelineContext | None = None,
+    ) -> ExtractionResult[ExtractionSchema]:
         """Run extraction against the Gemini API."""
+        _ = context  # Required by BaseExtractor; reserved for future metadata.
         span = mlflow.get_current_active_span()
         if span:
             span.set_inputs(
@@ -81,4 +102,4 @@ class GeminiImageExtractor(BaseExtractor):
             ),
         )
 
-        return response.parsed
+        return ExtractionResult(data=response.parsed)

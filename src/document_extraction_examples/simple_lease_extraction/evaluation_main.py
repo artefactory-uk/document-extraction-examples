@@ -85,7 +85,7 @@ def run_evaluation_pipeline(config_dir: Path) -> dict[str, int]:
     ]
     config: EvaluationPipelineConfig = load_evaluation_config(
         config_dir=config_dir,
-        orchestrator_config_cls=EvaluationOrchestratorConfig,
+        evaluation_orchestrator_config_cls=EvaluationOrchestratorConfig,
         test_data_loader_config_cls=LocalJSONTestDataLoaderConfig,
         evaluator_config_classes=evaluator_config_classes,
         reader_config_cls=LocalFileReaderConfig,
@@ -144,6 +144,7 @@ if __name__ == "__main__":
         tracking_uri="http://localhost:8080", experiment_name="simple_lease_evaluation"
     )
 
+    # Configure MLflow to drop large outputs from process_example spans
     def _drop_process_example_outputs(span: LiveSpan) -> None:
         """Span processor to drop outputs from process_example spans."""
         if span.name == "process_example":

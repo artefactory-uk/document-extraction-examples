@@ -4,7 +4,17 @@ import io
 from pathlib import Path
 
 from document_extraction_tools.base import BaseConverter
-from document_extraction_tools.types import Document, DocumentBytes, ImageData, Page
+from document_extraction_tools.config import (
+    EvaluationPipelineConfig,
+    ExtractionPipelineConfig,
+)
+from document_extraction_tools.types import (
+    Document,
+    DocumentBytes,
+    ImageData,
+    Page,
+    PipelineContext,
+)
 from pdf2image import convert_from_bytes
 
 from document_extraction_examples.simple_lease_extraction.config.pdf_to_image_converter_config import (
@@ -15,14 +25,26 @@ from document_extraction_examples.simple_lease_extraction.config.pdf_to_image_co
 class PDFToImageConverter(BaseConverter):
     """Converts PDF bytes into image pages."""
 
-    def __init__(self, config: PDFToImageConverterConfig) -> None:
+    def __init__(
+        self,
+        config: (
+            PDFToImageConverterConfig
+            | ExtractionPipelineConfig
+            | EvaluationPipelineConfig
+        ),
+    ) -> None:
         """Initialize converter with example config."""
         super().__init__(config)
-        self.dpi = config.dpi
-        self.image_format = config.format
+        self.dpi = self.config.dpi
+        self.image_format = self.config.format
 
-    def convert(self, document_bytes: DocumentBytes) -> Document:
+    def convert(
+        self,
+        document_bytes: DocumentBytes,
+        context: PipelineContext | None = None,
+    ) -> Document:
         """Convert raw PDF bytes into a Document with image pages."""
+        _ = context  # Required by BaseConverter; reserved for future metadata.
         pil_images = convert_from_bytes(
             document_bytes.file_bytes, dpi=self.dpi, fmt=self.image_format
         )

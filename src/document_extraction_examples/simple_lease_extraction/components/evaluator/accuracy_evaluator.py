@@ -2,7 +2,11 @@
 
 import mlflow
 from document_extraction_tools.base import BaseEvaluator
-from document_extraction_tools.types import EvaluationResult
+from document_extraction_tools.types import (
+    EvaluationResult,
+    ExtractionResult,
+    PipelineContext,
+)
 
 from document_extraction_examples.simple_lease_extraction.config.evaluator_config import (
     AccuracyEvaluatorConfig,
@@ -44,11 +48,15 @@ class AccuracyEvaluator(BaseEvaluator[SimpleLeaseDetails]):
 
     @mlflow.trace(name="evaluate_accuracy", span_type="EVALUATOR")
     def evaluate(
-        self, true: SimpleLeaseDetails, pred: SimpleLeaseDetails
+        self,
+        true: ExtractionResult[SimpleLeaseDetails],
+        pred: ExtractionResult[SimpleLeaseDetails],
+        context: PipelineContext | None = None,
     ) -> EvaluationResult:
         """Compute field-level exact match accuracy."""
-        true_data = true.model_dump()
-        pred_data = pred.model_dump()
+        _ = context  # Required by BaseEvaluator; reserved for future metadata.
+        true_data = true.data.model_dump()
+        pred_data = pred.data.model_dump()
 
         total = len(true_data)
         matches = sum(
