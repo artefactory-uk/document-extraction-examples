@@ -95,5 +95,5 @@ quote-style = "double"
 known-first-party = ["document-extraction-examples"] # enter your module name here, e.g. "src"
 
 [build-system]
-requires = ["uv_build>=0.9.9,<0.10.0"]
+requires = ["uv_build>=0.9.9,<0.11.0"]
 build-backend = "uv_build"
